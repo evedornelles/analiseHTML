@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Studio Heeler — Dashboard Comercial Analytics</title>
+  <style>
+    [data-theme="dark"] {
+      --bg-main: #0B0F0D;
+      --card-bg: #121815;
+      --card-border: #1E2923;
+      --text-main: #ECFDF5;
+      --text-muted: #789082;
+      --accent-green: #10B981;
+      --accent-green-dark: #059669;
+      --accent-glow: rgba(16, 185, 129, 0.12);
+      --accent-red: #F87171;
+      --accent-red-glow: rgba(248, 113, 113, 0.12);
+      --input-bg: #17201B;
+      --bar-bg: #1A2620;
+    }
+
+    [data-theme="light"] {
+      --bg-main: #F4F7F5;
+      --card-bg: #FFFFFF;
+      --card-border: #E2E8E4;
+      --text-main: #0F1713;
+      --text-muted: #5A6E62;
+      --accent-green: #059669;
+      --accent-green-dark: #047857;
+      --accent-glow: rgba(5, 150, 105, 0.08);
+      --accent-red: #DC2626;
+      --accent-red-glow: rgba(220, 38, 38, 0.08);
+      --input-bg: #EFF4F0;
+      --bar-bg: #E1E8E3;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-main);
+      color: var(--text-main);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      padding: 24px;
+      line-height: 1.5;
+      transition: background-color 0.2s ease, color 0.2s ease;
+    }
+
+    .dashboard-container {
+      max-width: 1360px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-logo {
+      width: 38px;
+      height: 38px;
+      background: var(--accent-green);
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFF;
+      font-weight: 800;
+      font-size: 1.2rem;
+      flex-shrink: 0;
+    }
+
+    .title-group h1 { font-size: 1.4rem; font-weight: 700; letter-spacing: -0.4px; }
+    .title-group p { color: var(--text-muted); font-size: 0.85rem; }
+
+    .header-right { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+    .live-pill {
+      display: flex; align-items: center; gap: 6px;
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      padding: 6px 12px; border-radius: 8px; font-size: 0.78rem; color: var(--text-muted);
+    }
+    .live-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--accent-green); box-shadow: 0 0 0 3px var(--accent-glow); }
+
+    .theme-toggle-btn {
+      display: flex; align-items: center; justify-content: center;
+      width: 38px; height: 38px;
+      background: var(--card-bg); border: 1px solid var(--card-border);
+      border-radius: 8px; cursor: pointer; color: var(--text-main);
+      transition: border-color 0.15s ease, background-color 0.15s ease;
+    }
+    .theme-toggle-btn:hover { border-color: var(--accent-green); }
+    .theme-toggle-btn svg { width: 18px; height: 18px; }
+    .theme-toggle-btn .icon-moon { display: none; }
+    [data-theme="light"] .theme-toggle-btn .icon-sun { display: none; }
+    [data-theme="light"] .theme-toggle-btn .icon-moon { display: block; }
+
+    .filter-bar {
+      background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px;
+      padding: 16px; display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 12px; align-items: end;
+    }
+    .filter-group { display: flex; flex-direction: column; gap: 6px; }
+    .filter-group label { font-size: 0.72rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; }
+
+    .saas-input, .saas-select {
+      appearance: none; -webkit-appearance: none;
+      background-color: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-main);
+      padding: 10px 14px; border-radius: 8px; font-size: 0.85rem; font-weight: 500; outline: none; width: 100%; cursor: pointer;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+    .saas-select-wrapper { position: relative; }
+    .saas-select-wrapper::after {
+      content: '▾'; position: absolute; right: 14px; top: 50%; transform: translateY(-50%);
+      color: var(--text-muted); pointer-events: none; font-size: 0.8rem;
+    }
+    .saas-input:focus, .saas-select:focus { border-color: var(--accent-green); box-shadow: 0 0 0 2px var(--accent-glow); }
+    .filter-reset {
+      background: var(--input-bg); border: 1px solid var(--card-border); color: var(--text-muted);
+      padding: 10px 14px; border-radius: 8px; font-size: 0.8rem; font-weight: 600; cursor: pointer; width: 100%;
+    }
+    .filter-reset:hover { color: var(--text-main); border-color: var(--accent-green); }
+
+    #dashContent { transition: opacity 0.15s ease; display: flex; flex-direction: column; gap: 20px; }
+    #dashContent.is-loading { opacity: 0.45; }
+
+    .empty-state {
+      display: none; background-color: var(--card-bg); border: 1px dashed var(--card-border); border-radius: 12px;
+      padding: 60px 20px; text-align: center; color: var(--text-muted);
+    }
+    .empty-state strong { display: block; color: var(--text-main); font-size: 1.05rem; margin-bottom: 6px; }
+    .empty-state button {
+      margin-top: 14px; background: var(--accent-green); color: #fff; border: none; padding: 9px 18px;
+      border-radius: 8px; font-weight: 700; font-size: 0.82rem; cursor: pointer;
+    }
+
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; }
+    .card { background-color: var(--card-bg); border: 1px solid var(--card-border); border-radius: 12px; padding: 20px; }
+    .kpi-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; gap: 8px; }
+    .kpi-title { font-size: 0.8rem; color: var(--text-muted); font-weight: 600; }
+    .kpi-value { font-size: 1.5rem; font-weight: 700; letter-spacing: -0.5px; }
+    .kpi-tag { font-size: 0.72rem; padding: 2px 8px; border-radius: 12px; font-weight: 700; background: var(--accent-glow); color: var(--accent-green); white-space: nowrap; }
+    .kpi-tag.negative { background: var(--accent-red-glow); color: var(--accent-red); }
+    .kpi-footer { font-size: 0.75rem; color: var(--text-muted); margin-top: 6px; }
+
+    .grid-3-col { display: grid; grid-template-columns: 2fr 1fr; gap: 16px; }
+    .grid-2-col { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+    .grid-3-equal { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+    @media (max-width: 1024px) {
+      .grid-3-col, .grid-2-col, .grid-3-equal { grid-template-columns: 1fr; }
+    }
+
+    .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 8px; flex-wrap: wrap; }
+    .card-title { font-size: 0.95rem; font-weight: 600; }
+    .card-subtitle { font-size: 0.72rem; color: var(--text-muted); }
+
+    .chart-container { width: 100%; height: 250px; position: relative; }
+    svg.chart-svg { width: 100%; height: 100%; overflow: visible; }
+    .chart-line { fill: none; stroke: var(--accent-green); stroke-width: 2.5; }
+    .chart-area { fill: var(--accent-glow); }
+    .chart-grid { stroke: var(--card-border); stroke-width: 1; }
+    .chart-axis-label { fill: var(--text-muted); font-size: 9px; font-family: inherit; }
+    .chart-dot { fill: var(--bg-main); stroke: var(--accent-green); stroke-width: 2; cursor: pointer; }
+    .chart-dot:hover { fill: var(--accent-green); r: 5; }
+    .chart-empty-day { fill: var(--text-muted); opacity: 0.4; }
+
+    .top-branches { display: flex; flex-direction: column; gap: 12px; }
+    .branch-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 14px; background: var(--input-bg); border-radius: 8px; gap: 10px; }
+    .branch-rank { width: 22px; height: 22px; border-radius: 50%; background-color: var(--accent-green); color: #FFF; font-size: 0.75rem; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .branch-name { font-weight: 600; font-size: 0.85rem; }
+    .branch-val { font-weight: 700; color: var(--accent-green); font-size: 0.9rem; white-space: nowrap; }
+
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.85rem; }
+    th { color: var(--text-muted); font-weight: 600; padding-bottom: 10px; border-bottom: 1px solid var(--card-border); font-size: 0.75rem; text-transform: uppercase; }
+    td { padding: 10px 0; border-bottom: 1px solid var(--card-border); vertical-align: middle; }
+    tr:last-child td { border-bottom: none; }
+    .meta-cell { display: flex; align-items: center; gap: 8px; }
+    .meta-pct { min-width: 38px; font-variant-numeric: tabular-nums; }
+    .meta-badge { font-size: 0.65rem; font-weight: 800; color: var(--accent-green); background: var(--accent-glow); padding: 1px 6px; border-radius: 8px; white-space: nowrap; }
+
+    .funnel-list { display: flex; flex-direction: column; gap: 12px; }
+    .funnel-step { display: flex; flex-direction: column; gap: 4px; }
+    .funnel-info { display: flex; justify-content: space-between; font-size: 0.8rem; }
+    .progress-bg { background-color: var(--bar-bg); height: 8px; border-radius: 4px; width: 100%; overflow: hidden; }
+    .progress-fill { background-color: var(--accent-green); height: 100%; border-radius: 4px; transition: width 0.3s ease; }
+    .funnel-disabled { text-align: center; color: var(--text-muted); font-size: 0.82rem; padding: 30px 10px; }
+
+    footer { margin-top: 4px; padding-top: 16px; border-top: 1px solid var(--card-border); text-align: center; color: var(--text-muted); font-size: 0.8rem; }
+    footer strong { color: var(--text-main); }
+    footer .updated { display: block; font-size: 0.72rem; margin-top: 4px; }
+  </style>
+</head>
+<body>
+
+  <div class="dashboard-container">
+    <header>
+      <div class="brand-group">
+        <div class="brand-logo">H</div>
+        <div class="title-group">
+          <h1>Studio Heeler</h1>
+          <p>Painel de Controle Comercial &amp; Performance de Vendas</p>
+        </div>
+      </div>
+
+      <div class="header-right">
+        <div class="live-pill"><span class="live-dot"></span> Dados do mês corrente</div>
+        <button class="theme-toggle-btn" id="themeToggle" type="button" title="Alternar aparência" aria-label="Alternar aparência">
+          <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"></path></svg>
+          <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+      </div>
+    </header>
+
+    <section class="filter-bar">
+      <div class="filter-group">
+        <label>Período Inicial</label>
+        <input type="date" class="saas-input" id="filterStart" min="2026-08-01" max="2026-08-30" value="2026-08-01">
+      </div>
+      <div class="filter-group">
+        <label>Período Final</label>
+        <input type="date" class="saas-input" id="filterEnd" min="2026-08-01" max="2026-08-30" value="2026-08-30">
+      </div>
+      <div class="filter-group">
+        <label>Vendedor</label>
+        <div class="saas-select-wrapper">
+          <select class="saas-select" id="sellerFilter">
+            <option value="all">Todos os Vendedores</option>
+            <option value="1">Beatriz Costa</option>
+            <option value="2">Carlos Silva</option>
+            <option value="3">Mariana Lima</option>
+            <option value="4">Lucas Mendes</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Faixa de Preço</label>
+        <div class="saas-select-wrapper">
+          <select class="saas-select" id="priceFilter">
+            <option value="all">Todas as Faixas</option>
+            <option value="low">Até R$ 100,00</option>
+            <option value="mid">R$ 100,00 a R$ 500,00</option>
+            <option value="high">Acima de R$ 500,00</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>Canal de Venda</label>
+        <div class="saas-select-wrapper">
+          <select class="saas-select" id="channelFilter">
+            <option value="all">Todos os Canais</option>
+            <option value="online">E-commerce Direct</option>
+            <option value="physical">Lojas Físicas</option>
+            <option value="b2b">Corporativo / B2B</option>
+          </select>
+        </div>
+      </div>
+      <div class="filter-group">
+        <label>&nbsp;</label>
+        <button class="filter-reset" id="resetFilters">Limpar filtros</button>
+      </div>
+    </section>
+
+    <div id="emptyState" class="empty-state">
+      <strong>Nenhum pedido encontrado</strong>
+      Não há vendas que correspondam a essa combinação de filtros no período selecionado.
+      <br><button id="emptyStateReset">Limpar filtros</button>
+    </div>
+
+    <div id="dashContent">
+      <section class="kpi-grid">
+        <div class="card">
+          <div class="kpi-header">
+            <span class="kpi-title">Faturamento Total</span>
+            <span class="kpi-tag" id="tagRevenue">—</span>
+          </div>
+          <p class="kpi-value" id="kpiRevenue">—</p>
+          <p class="kpi-footer" id="footRevenue">—</p>
+        </div>
+
+        <div class="card">
+          <div class="kpi-header">
+            <span class="kpi-title">Volume de Pedidos</span>
+            <span class="kpi-tag" id="tagOrders">—</span>
+          </div>
+          <p class="kpi-value" id="kpiOrders">—</p>
+          <p class="kpi-footer" id="footOrders">—</p>
+        </div>
+
+        <div class="card">
+          <div class="kpi-header">
+            <span class="kpi-title">CAC vs. LTV</span>
+            <span class="kpi-tag" id="tagCacLtv">—</span>
+          </div>
+          <p class="kpi-value" id="kpiCacLtv">—</p>
+          <p class="kpi-footer">Custo de aquisição vs. valor médio do cliente</p>
+        </div>
+
+        <div class="card">
+          <div class="kpi-header">
+            <span class="kpi-title">Taxa de Recompra</span>
+            <span class="kpi-tag" id="tagRepurchase">—</span>
+          </div>
+          <p class="kpi-value" id="kpiRepurchase">—</p>
+          <p class="kpi-footer" id="footRepurchase">Clientes com 2+ compras no período</p>
+        </div>
+
+        <div class="card">
+          <div class="kpi-header">
+            <span class="kpi-title">ROAS Comercial</span>
+            <span class="kpi-tag" id="tagRoas">—</span>
+          </div>
+          <p class="kpi-value" id="kpiRoas">—</p>
+          <p class="kpi-footer">Retorno p/ cada R$ 1 investido em mídia</p>
+        </div>
+      </section>
+
+      <section class="grid-3-col">
+        <div class="card">
+          <div class="card-header">
+            <div>
+              <h2 class="card-title">Evolução do Faturamento</h2>
+              <span class="card-subtitle" id="chartSubtitle">—</span>
+            </div>
+          </div>
+          <div class="chart-container">
+            <svg class="chart-svg" id="chartSvg" viewBox="0 0 700 250"></svg>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">🏆 Top Filiais</h2>
+          </div>
+          <div class="top-branches" id="topBranches"></div>
+        </div>
+      </section>
+
+      <section class="grid-3-equal">
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Vendedor vs. Venda</h2>
+          </div>
+          <table>
+            <thead>
+              <tr><th>Vendedor</th><th>Vendas</th><th>Meta %</th></tr>
+            </thead>
+            <tbody id="sellerTableBody"></tbody>
+          </table>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Funil de Conversão</h2>
+          </div>
+          <div id="funnelContainer"></div>
+        </div>
+
+        <div class="card">
+          <div class="card-header">
+            <h2 class="card-title">Métodos de Pagamento</h2>
+          </div>
+          <div class="funnel-list" id="paymentContainer"></div>
+        </div>
+      </section>
+    </div>
+
+    <footer>
+      Studio Heeler © 2026 — Desenvolvido por <strong>Évelim Dornelles</strong>
+      <span class="updated" id="updatedAt"></span>
+    </footer>
+  </div>
+
+  <script>
+  (function () {
+    // ---------- Tema ----------
+    const themeToggle = document.getElementById('themeToggle');
+    themeToggle.addEventListener('click', () => {
+      const current = document.documentElement.getAttribute('data-theme');
+      document.documentElement.setAttribute('data-theme', current === 'dark' ? 'light' : 'dark');
+    });
+
+    // ---------- PRNG determinístico (mesma "base de dados" a cada carregamento) ----------
+    function mulberry32(seed) {
+      return function () {
+        seed |= 0; seed = (seed + 0x6D2B79F5) | 0;
+        let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+        t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    const rand = mulberry32(84721);
+
+    function weightedPick(list, key) {
+      const total = list.reduce((s, x) => s + x[key], 0);
+      let r = rand() * total;
+      for (const item of list) {
+        r -= item[key];
+        if (r <= 0) return item;
+      }
+      return list[list.length - 1];
+    }
+
+    // ---------- Modelo de dados ----------
+    const SELLERS = [
+      { id: '1', name: 'Beatriz Costa', weight: 0.328, quota: 116000 },
+      { id: '2', name: 'Carlos Silva', weight: 0.275, quota: 116000 },
+      { id: '3', name: 'Mariana Lima', weight: 0.215, quota: 114000 },
+      { id: '4', name: 'Lucas Mendes', weight: 0.182, quota: 113000 },
+    ];
+    const BRANCHES = [
+      { name: 'Matriz São Paulo', weight: 0.40 },
+      { name: 'Filial Curitiba', weight: 0.27 },
+      { name: 'Filial Rio de Janeiro', weight: 0.20 },
+      { name: 'Filial Porto Alegre', weight: 0.13 },
+    ];
+    const CHANNELS_WEEKDAY = [
+      { id: 'online', label: 'E-commerce Direct', weight: 0.55 },
+      { id: 'physical', label: 'Lojas Físicas', weight: 0.33 },
+      { id: 'b2b', label: 'Corporativo / B2B', weight: 0.12 },
+    ];
+    const CHANNELS_WEEKEND = [
+      { id: 'online', label: 'E-commerce Direct', weight: 0.70 },
+      { id: 'physical', label: 'Lojas Físicas', weight: 0.28 },
+      { id: 'b2b', label: 'Corporativo / B2B', weight: 0.02 },
+    ];
+    const PRICE_TIERS = [
+      { id: 'low', label: 'Até R$ 100,00', min: 25, max: 99.9, weight: 0.50 },
+      { id: 'mid', label: 'R$ 100,00 a R$ 500,00', min: 100, max: 260, weight: 0.42 },
+      { id: 'high', label: 'Acima de R$ 500,00', min: 500, max: 650, weight: 0.08 },
+    ];
+    const PAYMENT_WEIGHTS = {
+      online: [{ id: 'pix', label: 'PIX (Aprovação Instantânea)', weight: 0.58 }, { id: 'credit', label: 'Cartão de Crédito', weight: 0.35 }, { id: 'boleto', label: 'Boleto Bancário', weight: 0.07 }],
+      physical: [{ id: 'pix', label: 'PIX (Aprovação Instantânea)', weight: 0.45 }, { id: 'credit', label: 'Cartão de Crédito', weight: 0.48 }, { id: 'boleto', label: 'Boleto Bancário', weight: 0.07 }],
+      b2b: [{ id: 'pix', label: 'PIX (Aprovação Instantânea)', weight: 0.15 }, { id: 'credit', label: 'Cartão de Crédito', weight: 0.25 }, { id: 'boleto', label: 'Boleto Bancário', weight: 0.60 }],
+    };
+
+    const NUM_CUSTOMERS = 4800;
+    const MONTHLY_MARKETING_SPEND = 118000;
+    const DAYS_IN_MONTH = 30; // Ago/2026 até o dia 30 (hoje)
+
+    const orders = [];
+    const seenCustomers = new Set();
+
+    for (let i = 0; i < DAYS_IN_MONTH; i++) {
+      const date = new Date(2026, 7, 1 + i); // Agosto = mês 7 (0-index)
+      const iso = date.toISOString().slice(0, 10);
+      const isWeekend = date.getDay() === 0 || date.getDay() === 6;
+      const base = 68 + i * 2.15;
+      const noise = (rand() - 0.5) * 16;
+      const dayCount = Math.max(24, Math.round((base + noise) * (isWeekend ? 0.72 : 1.06)));
+      const channelPool = isWeekend ? CHANNELS_WEEKEND : CHANNELS_WEEKDAY;
+
+      for (let n = 0; n < dayCount; n++) {
+        const seller = weightedPick(SELLERS, 'weight');
+        const branch = weightedPick(BRANCHES, 'weight');
+        const channel = weightedPick(channelPool, 'weight');
+        const tier = weightedPick(PRICE_TIERS, 'weight');
+        const payment = weightedPick(PAYMENT_WEIGHTS[channel.id], 'weight');
+        const amount = Math.round((tier.min + rand() * (tier.max - tier.min)) * 100) / 100;
+        const custIdx = Math.floor(rand() * NUM_CUSTOMERS);
+        const customerId = 'C' + custIdx;
+        const isNew = !seenCustomers.has(customerId);
+        if (isNew) seenCustomers.add(customerId);
+
+        orders.push({
+          date: iso, dayIndex: i, sellerId: seller.id, branch: branch.name,
+          channel: channel.id, tier: tier.id, amount, payment: payment.id, customerId, isNew,
+        });
+      }
+    }
+
+    // Baseline "lifetime" (dentro do mês) de cada cliente, calculado uma única vez
+    const customerLifetimeRevenue = new Map();
+    orders.forEach(o => {
+      customerLifetimeRevenue.set(o.customerId, (customerLifetimeRevenue.get(o.customerId) || 0) + o.amount);
+    });
+
+    const AUG_TOTAL_REVENUE = orders.reduce((s, o) => s + o.amount, 0);
+    const AUG_TOTAL_ORDERS = orders.length;
+
+    // Crescimento vs. mês anterior: cada segmento (canal x faixa de preço) evoluiu de forma
+    // diferente, então o comparativo reage de verdade aos filtros em vez de ser uma razão fixa.
+    const CHANNEL_GROWTH_RAW = { online: 1.25, physical: 1.05, b2b: 0.90 };
+    const TIER_GROWTH_RAW = { low: 1.02, mid: 1.15, high: 1.30 };
+    const rawGrowth = (o) => CHANNEL_GROWTH_RAW[o.channel] * TIER_GROWTH_RAW[o.tier];
+    const impliedGrowth = AUG_TOTAL_REVENUE / orders.reduce((s, o) => s + o.amount / rawGrowth(o), 0);
+    const TARGET_MONTHLY_GROWTH = 1.148; // faturamento total cresceu 14,8% vs mês anterior
+    const GROWTH_SCALE = TARGET_MONTHLY_GROWTH / impliedGrowth;
+    const segmentGrowth = (o) => rawGrowth(o) * GROWTH_SCALE;
+
+    const GLOBAL_REPURCHASE_RATE = (() => {
+      const counts = new Map();
+      orders.forEach(o => counts.set(o.customerId, (counts.get(o.customerId) || 0) + 1));
+      const unique = counts.size;
+      const repeat = [...counts.values()].filter(c => c >= 2).length;
+      return (repeat / unique) * 100;
+    })();
+
+    // ---------- Formatação ----------
+    const fmtBRL = (v) => 'R$ ' + v.toLocaleString('pt-BR', { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+    const fmtBRLDec = (v) => v.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+    const fmtPct = (v) => v.toLocaleString('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }) + '%';
+    const fmtInt = (v) => v.toLocaleString('pt-BR');
+    const fmtDate = (iso) => { const [y, m, d] = iso.split('-'); return `${d}/${m}`; };
+
+    function setTag(el, value, suffix) {
+      el.textContent = (value >= 0 ? '+' : '') + fmtPct(value);
+      el.classList.toggle('negative', value < 0);
+    }
+
+    // ---------- Elementos ----------
+    const els = {
+      start: document.getElementById('filterStart'),
+      end: document.getElementById('filterEnd'),
+      seller: document.getElementById('sellerFilter'),
+      price: document.getElementById('priceFilter'),
+      channel: document.getElementById('channelFilter'),
+      reset: document.getElementById('resetFilters'),
+      emptyReset: document.getElementById('emptyStateReset'),
+      dashContent: document.getElementById('dashContent'),
+      emptyState: document.getElementById('emptyState'),
+      updatedAt: document.getElementById('updatedAt'),
+    };
+
+    function getFilteredOrders() {
+      let start = els.start.value, end = els.end.value;
+      if (start > end) { const t = start; start = end; end = t; els.start.value = start; els.end.value = end; }
+      const sellerVal = els.seller.value, priceVal = els.price.value, channelVal = els.channel.value;
+      return orders.filter(o =>
+        o.date >= start && o.date <= end &&
+        (sellerVal === 'all' || o.sellerId === sellerVal) &&
+        (priceVal === 'all' || o.tier === priceVal) &&
+        (channelVal === 'all' || o.channel === channelVal)
+      );
+    }
+
+    function render() {
+      const filtered = getFilteredOrders();
+      els.emptyState.style.display = filtered.length === 0 ? 'block' : 'none';
+      els.dashContent.style.display = filtered.length === 0 ? 'none' : 'flex';
+      els.updatedAt.textContent = 'Última atualização: ' + new Date().toLocaleString('pt-BR');
+      if (filtered.length === 0) return;
+
+      renderKPIs(filtered);
+      renderChart(filtered);
+      renderTopBranches(filtered);
+      renderSellerTable(filtered);
+      renderFunnel(filtered);
+      renderPayments(filtered);
+    }
+
+    function renderKPIs(filtered) {
+      const revenue = filtered.reduce((s, o) => s + o.amount, 0);
+      const orderCount = filtered.length;
+      const avgTicket = revenue / orderCount;
+
+      const prevRevenue = filtered.reduce((s, o) => s + o.amount / segmentGrowth(o), 0);
+      const prevOrders = filtered.reduce((s, o) => s + 1 / segmentGrowth(o), 0);
+      const revChange = prevRevenue > 0 ? ((revenue - prevRevenue) / prevRevenue) * 100 : 0;
+      const ordChange = prevOrders > 0 ? ((orderCount - prevOrders) / prevOrders) * 100 : 0;
+
+      document.getElementById('kpiRevenue').textContent = fmtBRL(revenue);
+      setTag(document.getElementById('tagRevenue'), revChange);
+      document.getElementById('footRevenue').textContent = `vs. ${fmtBRL(prevRevenue)} (estimado) no período anterior`;
+
+      document.getElementById('kpiOrders').textContent = fmtInt(orderCount);
+      setTag(document.getElementById('tagOrders'), ordChange);
+      document.getElementById('footOrders').textContent = `Ticket Médio: ${fmtBRLDec(avgTicket)}`;
+
+      // Recompra
+      const custCounts = new Map();
+      filtered.forEach(o => custCounts.set(o.customerId, (custCounts.get(o.customerId) || 0) + 1));
+      const uniqueCust = custCounts.size;
+      const repeatCust = [...custCounts.values()].filter(c => c >= 2).length;
+      const repurchaseRate = uniqueCust ? (repeatCust / uniqueCust) * 100 : 0;
+      document.getElementById('kpiRepurchase').textContent = fmtPct(repurchaseRate);
+      setTag(document.getElementById('tagRepurchase'), repurchaseRate - GLOBAL_REPURCHASE_RATE);
+      document.getElementById('footRepurchase').textContent = `${fmtInt(repeatCust)} de ${fmtInt(uniqueCust)} clientes recorrentes`;
+
+      // CAC / LTV
+      const daysSelected = new Set(filtered.map(o => o.dayIndex)).size;
+      const marketingSpend = MONTHLY_MARKETING_SPEND * (daysSelected / DAYS_IN_MONTH);
+      const newCustomers = filtered.filter(o => o.isNew).length;
+      const cac = newCustomers > 0 ? marketingSpend / newCustomers : null;
+      const ltvValues = [...uniqueSet(filtered.map(o => o.customerId))].map(id => customerLifetimeRevenue.get(id) || 0);
+      const ltv = ltvValues.length ? ltvValues.reduce((s, v) => s + v, 0) / ltvValues.length : 0;
+
+      document.getElementById('kpiCacLtv').textContent = cac ? `${fmtBRLDec(cac)} / ${fmtBRLDec(ltv)}` : `— / ${fmtBRLDec(ltv)}`;
+      const ratio = cac ? ltv / cac : 0;
+      document.getElementById('tagCacLtv').textContent = cac ? ratio.toFixed(1) + 'x' : 'n/d';
+      document.getElementById('tagCacLtv').classList.remove('negative');
+
+      // ROAS
+      const roas = marketingSpend > 0 ? revenue / marketingSpend : 0;
+      document.getElementById('kpiRoas').textContent = roas.toFixed(1) + 'x';
+      document.getElementById('tagRoas').textContent = marketingSpend > 0 ? fmtBRLDec(marketingSpend / daysSelected) + '/dia' : '—';
+      document.getElementById('tagRoas').classList.remove('negative');
+    }
+
+    function uniqueSet(arr) { return new Set(arr); }
+
+    function renderChart(filtered) {
+      const start = els.start.value, end = els.end.value;
+      const dayMap = new Map();
+      filtered.forEach(o => dayMap.set(o.date, (dayMap.get(o.date) || 0) + o.amount));
+
+      const allDates = [];
+      let d = new Date(start + 'T00:00:00');
+      const endD = new Date(end + 'T00:00:00');
+      while (d <= endD) { allDates.push(d.toISOString().slice(0, 10)); d.setDate(d.getDate() + 1); }
+
+      const values = allDates.map(iso => dayMap.get(iso) || 0);
+      const maxVal = Math.max(...values, 1);
+
+      const W = 700, H = 250, padL = 54, padR = 14, padT = 16, padB = 30;
+      const plotW = W - padL - padR, plotH = H - padT - padB;
+
+      const svg = document.getElementById('chartSvg');
+      svg.innerHTML = '';
+      const ns = 'http://www.w3.org/2000/svg';
+      const mk = (tag, attrs) => { const el = document.createElementNS(ns, tag); for (const k in attrs) el.setAttribute(k, attrs[k]); return el; };
+
+      // Gridlines + labels do eixo Y
+      const steps = 4;
+      for (let s = 0; s <= steps; s++) {
+        const val = (maxVal / steps) * s;
+        const y = padT + plotH - (val / maxVal) * plotH;
+        svg.appendChild(mk('line', { x1: padL, x2: W - padR, y1: y, y2: y, class: 'chart-grid' }));
+        const label = mk('text', { x: padL - 8, y: y + 3, class: 'chart-axis-label', 'text-anchor': 'end' });
+        label.textContent = val >= 1000 ? (val / 1000).toFixed(0) + 'k' : val.toFixed(0);
+        svg.appendChild(label);
+      }
+
+      const pts = values.map((v, i) => {
+        const x = padL + (allDates.length > 1 ? (i / (allDates.length - 1)) * plotW : plotW / 2);
+        const y = padT + plotH - (v / maxVal) * plotH;
+        return [x, y];
+      });
+
+      if (pts.length > 1) {
+        const linePath = 'M ' + pts.map(p => p.join(',')).join(' L ');
+        const areaPath = linePath + ` L ${pts[pts.length - 1][0]},${padT + plotH} L ${pts[0][0]},${padT + plotH} Z`;
+        svg.appendChild(mk('path', { d: areaPath, class: 'chart-area' }));
+        svg.appendChild(mk('path', { d: linePath, class: 'chart-line' }));
+      }
+
+      pts.forEach(([x, y], i) => {
+        const c = mk('circle', { cx: x, cy: y, r: 3.2, class: 'chart-dot' });
+        const title = mk('title', {});
+        title.textContent = `${fmtDate(allDates[i])}: ${fmtBRLDec(values[i])}`;
+        c.appendChild(title);
+        svg.appendChild(c);
+      });
+
+      // Labels eixo X (a cada ~5 dias, ou todos se período curto)
+      const xLabelStep = allDates.length <= 8 ? 1 : Math.ceil(allDates.length / 7);
+      allDates.forEach((iso, i) => {
+        if (i % xLabelStep !== 0 && i !== allDates.length - 1) return;
+        const x = padL + (allDates.length > 1 ? (i / (allDates.length - 1)) * plotW : plotW / 2);
+        const label = mk('text', { x, y: H - 8, class: 'chart-axis-label', 'text-anchor': 'middle' });
+        label.textContent = fmtDate(iso);
+        svg.appendChild(label);
+      });
+
+      document.getElementById('chartSubtitle').textContent =
+        `${fmtDate(start)} a ${fmtDate(end)}/2026 · pico de ${fmtBRLDec(maxVal)} em ${fmtDate(allDates[values.indexOf(maxVal)] || start)}`;
+    }
+
+    function renderTopBranches(filtered) {
+      const map = new Map();
+      filtered.forEach(o => {
+        if (!map.has(o.branch)) map.set(o.branch, { revenue: 0, count: 0 });
+        const b = map.get(o.branch);
+        b.revenue += o.amount; b.count += 1;
+      });
+      const sorted = [...map.entries()].sort((a, b) => b[1].revenue - a[1].revenue).slice(0, 3);
+      const container = document.getElementById('topBranches');
+      container.innerHTML = sorted.map(([name, data], i) => `
+        <div class="branch-item">
+          <div style="display:flex; align-items:center; gap:10px;">
+            <span class="branch-rank">${i + 1}</span>
+            <div>
+              <p class="branch-name">${name}</p>
+              <small style="color:var(--text-muted)">${fmtInt(data.count)} pedidos</small>
+            </div>
+          </div>
+          <span class="branch-val">${fmtBRL(data.revenue)}</span>
+        </div>`).join('') || '<p style="color:var(--text-muted); font-size:0.85rem;">Sem dados para os filtros atuais.</p>';
+    }
+
+    function renderSellerTable(filtered) {
+      const daysSelected = new Set(filtered.map(o => o.dayIndex)).size;
+      const activeSellers = els.seller.value === 'all' ? SELLERS : SELLERS.filter(s => s.id === els.seller.value);
+      const rows = activeSellers.map(seller => {
+        const sellerOrders = filtered.filter(o => o.sellerId === seller.id);
+        const total = sellerOrders.reduce((s, o) => s + o.amount, 0);
+        const quotaForPeriod = seller.quota * (daysSelected / DAYS_IN_MONTH);
+        const pct = quotaForPeriod > 0 ? (total / quotaForPeriod) * 100 : 0;
+        const barWidth = Math.min(pct, 100);
+        const overBadge = pct >= 100 ? `<span class="meta-badge">Meta batida</span>` : '';
+        return `
+          <tr>
+            <td><strong>${seller.name}</strong></td>
+            <td>${fmtBRL(total)}</td>
+            <td>
+              <div class="meta-cell">
+                <span class="meta-pct">${pct.toFixed(0)}%</span>
+                <div class="progress-bg" style="flex:1"><div class="progress-fill" style="width:${barWidth}%"></div></div>
+                ${overBadge}
+              </div>
+            </td>
+          </tr>`;
+      }).join('');
+      document.getElementById('sellerTableBody').innerHTML = rows ||
+        `<tr><td colspan="3" style="color:var(--text-muted); text-align:center; padding:20px 0;">Sem vendas no período.</td></tr>`;
+    }
+
+    function renderFunnel(filtered) {
+      const container = document.getElementById('funnelContainer');
+      const channelVal = els.channel.value;
+      if (channelVal === 'physical' || channelVal === 'b2b') {
+        container.innerHTML = `<div class="funnel-disabled">Funil de conversão disponível apenas para o canal <strong>E-commerce Direct</strong>.<br>Ajuste o filtro de canal para visualizar.</div>`;
+        return;
+      }
+      const purchases = filtered.filter(o => o.channel === 'online').length;
+      if (purchases === 0) {
+        container.innerHTML = `<div class="funnel-disabled">Nenhuma compra via e-commerce no período selecionado.</div>`;
+        return;
+      }
+      const purchaseRate = 0.079, checkoutRate = 0.14, cartRate = 0.30;
+      const visitors = Math.round(purchases / purchaseRate);
+      const cart = Math.round(visitors * cartRate);
+      const checkout = Math.round(visitors * checkoutRate);
+      const steps = [
+        ['Visitantes Únicos', visitors, 100],
+        ['Adição ao Carrinho', cart, (cart / visitors) * 100],
+        ['Início do Checkout', checkout, (checkout / visitors) * 100],
+        ['Compras Finalizadas', purchases, (purchases / visitors) * 100],
+      ];
+      container.innerHTML = `<div class="funnel-list">` + steps.map(([label, val, pct]) => `
+        <div class="funnel-step">
+          <div class="funnel-info"><span>${label}</span><strong>${fmtInt(val)} (${pct.toFixed(1).replace('.0', '')}%)</strong></div>
+          <div class="progress-bg"><div class="progress-fill" style="width:${pct}%"></div></div>
+        </div>`).join('') + `</div>`;
+    }
+
+    function renderPayments(filtered) {
+      const counts = { pix: 0, credit: 0, boleto: 0 };
+      filtered.forEach(o => counts[o.payment]++);
+      const total = filtered.length;
+      const labels = { pix: 'PIX (Aprovação Instantânea)', credit: 'Cartão de Crédito', boleto: 'Boleto Bancário' };
+      const order = ['pix', 'credit', 'boleto'];
+      document.getElementById('paymentContainer').innerHTML = order.map(k => {
+        const pct = total ? (counts[k] / total) * 100 : 0;
+        return `
+          <div class="funnel-step">
+            <div class="funnel-info"><span>${labels[k]}</span><strong>${pct.toFixed(0)}%</strong></div>
+            <div class="progress-bg"><div class="progress-fill" style="width:${pct}%"></div></div>
+          </div>`;
+      }).join('');
+    }
+
+    // ---------- Eventos ----------
+    [els.start, els.end, els.seller, els.price, els.channel].forEach(el => {
+      el.addEventListener('change', () => {
+        els.dashContent.classList.add('is-loading');
+        setTimeout(() => { render(); els.dashContent.classList.remove('is-loading'); }, 120);
+      });
+    });
+    function resetFilters() {
+      els.start.value = '2026-08-01'; els.end.value = '2026-08-30';
+      els.seller.value = 'all'; els.price.value = 'all'; els.channel.value = 'all';
+      render();
+    }
+    els.reset.addEventListener('click', resetFilters);
+    els.emptyReset.addEventListener('click', resetFilters);
+
+    render();
+  })();
+  </script>
+</body>
+</html>
