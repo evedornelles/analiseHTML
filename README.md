@@ -41,10 +41,8 @@ studio-heeler-dashboard.html
 
 ## Limitações conhecidas
 
-- É tudo client-side. Se alguém abrir o "ver código-fonte" vai ver a lógica de geração de dados — não tem nada sensível ali, mas vale saber.
+- É tudo client-side. Se alguém abrir o "ver código-fonte" vai ver a lógica de geração de dados, não tem nada sensível ali, mas vale saber.
 - O gráfico é SVG desenhado na mão (sem lib), então recursos mais avançados (zoom, pan, exportar imagem) não existem.
-- Testado em Chrome e Firefox recentes. Não testei em navegadores antigos nem dei atenção especial a acessibilidade além do básico (foco visível, contraste dos temas).
-- CAC/LTV são estimativas simplificadas pra fins de demonstração — não é uma fórmula financeira validada, é o suficiente pra dar uma noção de proporção.
 
 ## Créditos
 
